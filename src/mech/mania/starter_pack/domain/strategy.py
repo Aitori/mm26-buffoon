@@ -8,6 +8,7 @@ from mech.mania.starter_pack.domain.api import API
 
 class Strategy:
     def __init__(self, memory):
+        self.buffoon = 0
         self.memory = memory
         self.logger = logging.getLogger('strategy')
         self.logger.setLevel(logging.DEBUG)
@@ -23,7 +24,7 @@ class Strategy:
         self.my_player = game_state.get_all_players()[player_name]
         self.board = game_state.get_pvp_board()
         self.curr_pos = self.my_player.get_position()
-
+        self.monster_positions = self.game_state.get_monsters_on_board(self.board)
         self.logger.info("In make_decision")
 
         # last_action, type = self.memory.get_value("last_action", str)
@@ -71,15 +72,33 @@ class Strategy:
         # )
         # self.logger.info("yes3")
         # return decision
+
         target_pos: Position = self.curr_pos
-        self.logger.info("On board " + str(target_pos.board_id) +" move to (" + str(target_pos.x) + ", " + str(target_pos.y) + ")")
-        decision = CharacterDecision(
-            decision_type="MOVE",
-            action_position=target_pos.create(target_pos.x, target_pos.y - 3, target_pos.get_board_id()),
-            action_index=0
-        )
-        self.logger.info("Moving!")
-        return decision
+        if target_pos.y >= 12:
+            self.buffoon = 1
+            self.logger.info("On board " + str(target_pos.board_id) +" move to (" + str(target_pos.x) + ", " + str(target_pos.y) + ")")
+            decision = CharacterDecision(
+                decision_type="MOVE",
+                action_position=target_pos.create(target_pos.x, target_pos.y - 3, target_pos.get_board_id()),
+                action_index=0
+            )
+            self.logger.info("Moving!")
+            return decision
+        elif self.buffoon == 0:
+            self.logger.info("On board " + str(target_pos.board_id) +" move to (" + str(target_pos.x) + ", " + str(target_pos.y) + ")")
+            decision = CharacterDecision(
+                decision_type="MOVE",
+                action_position=target_pos.create(target_pos.x, target_pos.y + 3, target_pos.get_board_id()),
+                action_index=0
+            )
+            self.logger.info("Moving!")
+            return decision
+        else:
+            return CharacterDecision(
+                decision_type="ATTACK",
+                action_position=self.monster_positions[0],
+                action_index=0
+            )
 
 
     # feel free to write as many helper functions as you need!
