@@ -51,7 +51,7 @@ class Strategy:
             return CharacterDecision(
                 decision_type="MOVE",
                 action_position=self.my_player.get_spawn_point(),
-                action_index=None
+                action_index=0
             )
 
         enemy_pos = enemies[0].get_position()
@@ -60,14 +60,14 @@ class Strategy:
             return CharacterDecision(
                 decision_type="ATTACK",
                 action_position=enemy_pos,
-                action_index=None
+                action_index=0
             )
 
         self.memory.set_value("last_action", "MOVE")
         decision = CharacterDecision(
             decision_type="MOVE",
             action_position=find_position_to_move(self.my_player, enemy_pos),
-            action_index=None
+            action_index=0
         )
         return decision
 
