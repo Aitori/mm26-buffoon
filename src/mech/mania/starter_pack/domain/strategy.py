@@ -56,7 +56,7 @@ class Strategy:
         #         action_index=0
         #     )
 
-        # weapon = self.my_player.get_weapon()
+        # 
         # enemies = self.api.find_enemies(self.curr_pos)
         # if enemies is None or len(enemies) > 0:
         #     self.memory.set_value("last_action", "MOVE")
@@ -86,15 +86,19 @@ class Strategy:
         
         ## Choose weakest monster
         weakestMonster = self.findWeakest(self.monsters)
+        weapon = self.my_player.get_weapon()
         ## Check if weakest monster is in attack range
         if self.curr_pos.manhattan_distance(weakestMonster.position) <= weapon.get_range():
-            return CharacterDecision(decision_type="ATTACK", action_position=weakestMonster.position, action_index=0)
+            self.logger.info("Attacking monster: " + str(weakestMonster.get_name()) + " with health " + str(weakestMonster.get_current_health()) + "/" + str(weakestMonster.get_max_health()))
+            return CharacterDecision(decision_type="ATTACK", action_position=weakestMonster.get_position(), action_index=0)
         ## Move to weakest monster!
         self.logger.info("Chosen weakest monster: " + str(weakestMonster.get_name()) + " || location: (" + str(weakestMonster.get_position().x) + "," + str(weakestMonster.get_position().y) + ")")
 
         positionToMove = self.zhou_astar_path_to_move(self.my_player, weakestMonster.get_position())
-
-        return CharacterDecision(decision_type="MOVE", action_position=positionToMove,
+        positionObjectToMove = self.curr_pos
+        newPos = positionObjectToMove.create(positionToMove[0], positionToMove[1], self.board_id)
+        self.logger.info("Location to move now: (" + str(newPos.x) + ", " + str(newPos.y) + ")")
+        return CharacterDecision(decision_type="MOVE", action_position=newPos,
 action_index=0)
 
 
@@ -117,20 +121,21 @@ action_index=0)
         return target_pos
 
     # Use astar to find path that doesn't aggro to target destination
-    def zhou_astar_path_to_move(self, player: Position, destination: Position) -> Position:
+    def zhou_astar_path_to_move(self, player: Position, destination: Position):
         frontier = []
         path = []
         pp = player.get_position();
         heapq.heapify(frontier)
         start = Node(0, None, (pp.x, pp.y))
-        heapq.heappush(frontier, (0, (pp.x, pp.y)))
+        heapq.heappush(frontier, (0, (pp.x, pp.y), start))
         visited = set()
         visited.add((pp.x, pp.y))
         while frontier:
-            curr = heapq.heappop(frontier)[1]
+            curr = heapq.heappop(frontier)[2]
             if curr.coord == (destination.x, destination.y):
                 while curr:
                     path.append(curr.coord)
+                    self.logger.info(str(curr.coord))
                     curr = curr.prev
                 path.reverse()
                 break
@@ -139,20 +144,17 @@ action_index=0)
                 if n not in visited:
                     dist = abs(destination.y - n[1]) + abs(destination.x - n[0])
                     newNode = Node(curr.cost + 1, curr, n)
-                    heapq.heappush(frontier, (newNode.cost + dist, newNode.coord))
+                    heapq.heappush(frontier, (newNode.cost + dist, newNode.coord, newNode))
                     visited.add(n)
-        if len(path) < player.get_speed():
-            pos = path[-1]
-        else:
-            pos = path[player.get_speed() - 1]
-        return pos
+        return path[1]
 
     # Find valid neighbors given coordinates
     def getNeighbors(self, getx, gety):
         neighbors = []
         for n in [(0,1), (0,-1), (-1,0), (1,0)]:
             coord = (getx + n[0], gety + n[1])
-            if coord in self.obstacles or coord in self.bad_monster_squares:
+            # if coord in self.obstacles or coord in self.bad_monster_squares:
+            if coord in self.obstacles:
                 continue
             else:
                 neighbors.append(coord)
@@ -164,28 +166,33 @@ action_index=0)
         obstacles = set()
         for x_idx in range(len(grid)):
             for y_idx in range(len(grid[x_idx])):
-                tile = self.board.get_tile_at(Position(x_idx, y_idx, "buffoon"))
-                if tile.TileType == "VOID" or tile.TileType == "IMPASSIBLE":
-                    print((x,y), tile.TileType)
-                    obstacles.add((x,y))
-        return obstacles:
+                curr_position = self.curr_pos
+                newPos = curr_position.create(x_idx, y_idx, self.board_id)
+                tile = self.board.get_tile_at(newPos)
+                if tile.type == "VOID" or tile.type == "IMPASSIBLE":
+                    obstacles.add((x_idx,y_idx))
+        return obstacles
 
     # Get coords of monster aggro squares
-    def get_monsters(self, gameState, board_id):
+    def get_monsters(self, game_state, board_id):
         monsters = game_state.get_monsters_on_board(board_id)
         bad_monster_squares = set()
         weakest = self.findWeakest(self.monsters);
+        weakest_position = weakest.get_position()
         for monster in monsters:
-            m_p = monster.position
+            m_p = monster.get_position()
             # skip over weakest monster
-            if m_p = weakest.position:
+            if m_p.x == weakest_position.x and m_p.y == weakest_position.y:
                 continue
             for direction in [(0,1), (0,-1), (-1,0), (1,0)]:
                 for step in range(monster.aggro_range):
-                    bad_monster_squares.add((direction[0] * step + monster.position.x , direction[1] * step + monster.position.y))
+                    bad_monster_squares.add((direction[0] * step + m_p.x , direction[1] * step + m_p.y))
         return bad_monster_squares
 
     # Find weakest monster
     def findWeakest(self, monsters):
         sortedM = sorted(monsters, key=lambda x:x.get_level())
-        return sortedM[0]
+        i = 0
+        while sortedM[i].get_current_health() <= 0:
+            i = i + 1
+        return sortedM[i]
