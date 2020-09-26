@@ -25,7 +25,7 @@ class Strategy:
         self.board = game_state.get_pvp_board()
         self.curr_pos = self.my_player.get_position()
         # self.monster_positions = self.game_state.get_monsters_on_board(self.board)
-        self.logger.info("In make_decision")
+        self.logger.info(str(game_state.get_monsters_on_board("buffoon")))
         # self.logger.info("Monster Position:{}".format(str(self.monster_positions[0])))
 
         # last_action, type = self.memory.get_value("last_action", str)
