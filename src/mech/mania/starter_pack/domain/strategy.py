@@ -75,7 +75,7 @@ class Strategy:
         self.logger.info("On board " + str(target_pos.board_id) +" move to (" + str(target_pos.x) + ", " + str(target_pos.y) + ")")
         decision = CharacterDecision(
             decision_type="MOVE",
-            action_position=target_pos.create(target_pos.x - 1, target_pos.y, target_pos.get_board_id()),
+            action_position=target_pos.create(target_pos.x, target_pos.y - 3, target_pos.get_board_id()),
             action_index=0
         )
         self.logger.info("Moving!")
@@ -94,6 +94,6 @@ class Strategy:
     
     def move_down_position(self):
         target_pos = self.curr_pos
-        target_pos.create(target_pos.x + 1, target_pos.y, target_pos.get_board_id())
+        target_pos.create(target_pos.x, target_pos.y, target_pos.get_board_id())
         self.logger.info("yes2")
         return target_pos
