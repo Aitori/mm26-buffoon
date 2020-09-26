@@ -26,42 +26,42 @@ class Strategy:
 
         self.logger.info("In make_decision")
 
-        last_action, type = self.memory.get_value("last_action", str)
-        if last_action is not None and last_action == "PICKUP":
-            self.memory.set_value("last_action", "EQUIP")
-            return CharacterDecision(
-                decision_type="EQUIP",
-                action_position=None,
-                action_index=self.my_player.get_free_inventory_index()
-            )
+        # last_action, type = self.memory.get_value("last_action", str)
+        # if last_action is not None and last_action == "PICKUP":
+        #     self.memory.set_value("last_action", "EQUIP")
+        #     return CharacterDecision(
+        #         decision_type="EQUIP",
+        #         action_position=None,
+        #         action_index=self.my_player.get_free_inventory_index()
+        #     )
 
-        tile_items = self.board.get_tile_at(self.curr_pos).items
-        if tile_items is not None or len(tile_items) > 0:
-            self.memory.set_value("last_action", "PICKUP")
-            return CharacterDecision(
-                decision_type="PICKUP",
-                action_position=None,
-                action_index=0
-            )
+        # tile_items = self.board.get_tile_at(self.curr_pos).items
+        # if tile_items is not None or len(tile_items) > 0:
+        #     self.memory.set_value("last_action", "PICKUP")
+        #     return CharacterDecision(
+        #         decision_type="PICKUP",
+        #         action_position=None,
+        #         action_index=0
+        #     )
 
-        weapon = self.my_player.get_weapon()
-        enemies = self.api.find_enemies(self.curr_pos)
-        if enemies is None or len(enemies) > 0:
-            self.memory.set_value("last_action", "MOVE")
-            return CharacterDecision(
-                decision_type="MOVE",
-                action_position=self.my_player.get_spawn_point(),
-                action_index=0
-            )
+        # weapon = self.my_player.get_weapon()
+        # enemies = self.api.find_enemies(self.curr_pos)
+        # if enemies is None or len(enemies) > 0:
+        #     self.memory.set_value("last_action", "MOVE")
+        #     return CharacterDecision(
+        #         decision_type="MOVE",
+        #         action_position=self.my_player.get_spawn_point(),
+        #         action_index=0
+        #     )
 
-        enemy_pos = enemies[0].get_position()
-        if self.curr_pos.manhattan_distance(enemy_pos) <= weapon.get_range():
-            self.memory.set_value("last_action", "ATTACK")
-            return CharacterDecision(
-                decision_type="ATTACK",
-                action_position=enemy_pos,
-                action_index=0
-            )
+        # enemy_pos = enemies[0].get_position()
+        # if self.curr_pos.manhattan_distance(enemy_pos) <= weapon.get_range():
+        #     self.memory.set_value("last_action", "ATTACK")
+        #     return CharacterDecision(
+        #         decision_type="ATTACK",
+        #         action_position=enemy_pos,
+        #         action_index=0
+        #     )
         # self.logger.info("yes1")
         # self.memory.set_value("last_action", "MOVE")
         # decision = CharacterDecision(
