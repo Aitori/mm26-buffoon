@@ -62,13 +62,14 @@ class Strategy:
                 action_position=enemy_pos,
                 action_index=0
             )
-
+        self.logger.info("yes1")
         self.memory.set_value("last_action", "MOVE")
         decision = CharacterDecision(
             decision_type="MOVE",
-            action_position=find_position_to_move(self.my_player, enemy_pos),
+            action_position=move_down_position(),#find_position_to_move(self.my_player, enemy_pos),
             action_index=0
         )
+        self.logger.info("yes3")
         return decision
 
 
@@ -81,3 +82,9 @@ class Strategy:
         else:
             pos = path[player.get_speed() - 1]
         return pos
+    
+    def move_down_position(self):
+        target_pos = self.curr_pos
+        target_pos.create(target_pos.x + 1, target_pos.y, target_pos.get_board_id())
+        self.logger.info("yes2")
+        return target_pos
