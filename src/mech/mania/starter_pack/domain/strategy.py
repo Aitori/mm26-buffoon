@@ -24,8 +24,9 @@ class Strategy:
         self.my_player = game_state.get_all_players()[player_name]
         self.board = game_state.get_pvp_board()
         self.curr_pos = self.my_player.get_position()
-        self.monster_positions = self.game_state.get_monsters_on_board(self.board)
+        # self.monster_positions = self.game_state.get_monsters_on_board(self.board)
         self.logger.info("In make_decision")
+        # self.logger.info("Monster Position:{}".format(str(self.monster_positions[0])))
 
         # last_action, type = self.memory.get_value("last_action", str)
         # if last_action is not None and last_action == "PICKUP":
@@ -74,31 +75,33 @@ class Strategy:
         # return decision
 
         target_pos: Position = self.curr_pos
-        if target_pos.y >= 12:
-            self.buffoon = 1
-            self.logger.info("On board " + str(target_pos.board_id) +" move to (" + str(target_pos.x) + ", " + str(target_pos.y) + ")")
-            decision = CharacterDecision(
-                decision_type="MOVE",
-                action_position=target_pos.create(target_pos.x, target_pos.y - 3, target_pos.get_board_id()),
-                action_index=0
-            )
-            self.logger.info("Moving!")
-            return decision
-        elif self.buffoon == 0:
-            self.logger.info("On board " + str(target_pos.board_id) +" move to (" + str(target_pos.x) + ", " + str(target_pos.y) + ")")
-            decision = CharacterDecision(
-                decision_type="MOVE",
-                action_position=target_pos.create(target_pos.x, target_pos.y + 3, target_pos.get_board_id()),
-                action_index=0
-            )
-            self.logger.info("Moving!")
-            return decision
-        else:
+        if target_pos.y == 12:
+            self.logger.info("Attacking!")
             return CharacterDecision(
                 decision_type="ATTACK",
-                action_position=self.monster_positions[0],
+                action_position=self.curr_pos,#self.monster_positions[0],
                 action_index=0
             )
+            # self.buffoon = 1
+            # self.logger.info("On board " + str(target_pos.board_id) +" move to (" + str(target_pos.x) + ", " + str(target_pos.y) + ")")
+            # decision = CharacterDecision(
+            #     decision_type="MOVE",
+            #     action_position=target_pos.create(target_pos.x, target_pos.y - 3, target_pos.get_board_id()),
+            #     action_index=0
+            # )
+            
+            # return decision
+        # elif self.buffoon == 0:
+        #     self.logger.info("On board " + str(target_pos.board_id) +" move to (" + str(target_pos.x) + ", " + str(target_pos.y) + ")")
+        #     decision = CharacterDecision(
+        #         decision_type="MOVE",
+        #         action_position=target_pos.create(target_pos.x, target_pos.y + 3, target_pos.get_board_id()),
+        #         action_index=0
+        #     )
+        #     self.logger.info("Moving!")
+        #     return decision
+        # else:
+        #     pass
 
 
     # feel free to write as many helper functions as you need!
