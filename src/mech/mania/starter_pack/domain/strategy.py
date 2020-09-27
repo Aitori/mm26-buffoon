@@ -51,7 +51,7 @@ class Strategy:
                     action_position=None,
                     action_index=i
                 )
-        
+
         # item pick up
         tile_items = self.board.get_tile_at(self.curr_pos).items
         if len(tile_items) > 0:
@@ -73,7 +73,7 @@ class Strategy:
                     action_position=target_pos,
                     action_index=0
                 )
-        
+
         ## Choose weakest monster
         weakestMonster = self.findWeakest(self.monsters, self.curr_pos)
         weapon = self.my_player.get_weapon()
@@ -102,7 +102,7 @@ action_index=0)
         else:
             pos = path[player.get_speed() - 1]
         return pos
-    
+
     # Just moving down
     def move_down_position(self):
         target_pos = self.curr_pos
@@ -174,10 +174,25 @@ action_index=0)
             # skip over weakest monster
             if m_p.x == weakest_position.x and m_p.y == weakest_position.y:
                 continue
+            bad_squares = self.diamond(m_p.x, m_p.y, monster.aggro_range)
+            for square in bad_squares:
+                bad_moster_squares.add(square)
+            '''
             for direction in [(0,1), (0,-1), (-1,0), (1,0)]:
                 for step in range(monster.aggro_range):
                     bad_monster_squares.add((direction[0] * step + m_p.x , direction[1] * step + m_p.y))
+            '''
         return bad_monster_squares
+
+    def diamond(self, pos_x, pos_y, dist):
+        res = []
+        for x_idx in range(pos_x - dist, pos_x + dist + 1):
+            for y_idx in range(pos_y - dis, pos_y + dist + 1):
+                if abs(x_idx - pos_x) + abs(y_idx - pos_y) <= dist:
+                    res.append((x_idx, y_idx))
+        return res
+
+
 
     # Find weakest monster
     def findWeakest(self, monsters, curr_pos):
