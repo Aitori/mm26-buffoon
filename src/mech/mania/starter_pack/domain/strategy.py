@@ -93,9 +93,9 @@ class Strategy:
                     #idk do we equip the consumable before we fite the guy
                     #but also if its a health potion do it now
                     self.logger.info('index {} is a consumable, dropping'.format(i))
-                    #actually drop consumables fuck em
+                    #actually drop consumables fuck em (no wee eat them right there)
                     return CharacterDecision(
-                            decision_type="DROP",
+                            decision_type="EQUIP",
                             action_position=None,
                             action_index=i
                         )
@@ -163,31 +163,36 @@ class Strategy:
         if len(tile_items) > 0:
             self.memory.set_value("last_action", "PICKUP")
             self.logger.info("picking up item: {}".format(tile_items))
-            try:
-                for i in range(len(tile_items)):
-                    self.logger.info("grading new item index {}".format(i))
-                    if "Consumable" in tile_items[i].__class__.__name__:
-                        #fuck consumables dont pick them up
-                        continue
-                    stat_mods = tile_items[i].get_stats()
-                    stat_sum = stat_mods.get_flat_speed_change() + stat_mods.get_percent_speed_change() + stat_mods.get_flat_health_change() + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change()
-                    if self.stats[tile_items[i].__class__.__name__.lower()] >= stat_sum:
-                        self.logger.info("picking up item at index {}".format(i))
-                        return CharacterDecision(
+            return CharacterDecision(
                             decision_type="PICKUP",
                             action_position=self.curr_pos,
-                            action_index=i
+                            action_index=0
                         )
-                    else:
-                        self.logger.info("skipping index {}, shitty item".format(i))
-            except Exception as e:
-                self.logger.error(e)
-                self.logger.info("picking up item at index 0")
-                return CharacterDecision(
-                    decision_type="PICKUP",
-                    action_position=self.curr_pos,
-                    action_index=i
-                )
+            # try:
+            #     for i in range(len(tile_items)):
+            #         self.logger.info("grading new item index {}".format(i))
+            #         # if "Consumable" in tile_items[i].__class__.__name__:
+            #         #     #fuck consumables dont pick them up
+            #         #     continue
+            #         # stat_mods = tile_items[i].get_stats()
+            #         # stat_sum = stat_mods.get_flat_speed_change() + stat_mods.get_percent_speed_change() + stat_mods.get_flat_health_change() + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change()
+            #         # if self.stats[tile_items[i].__class__.__name__.lower()] >= stat_sum:
+            #             self.logger.info("picking up item at index {}".format(i))
+            #             return CharacterDecision(
+            #                 decision_type="PICKUP",
+            #                 action_position=self.curr_pos,
+            #                 action_index=i
+            #             )
+            #         # else:
+            #         #     self.logger.info("skipping index {}, shitty item".format(i))
+            # except Exception as e:
+                # self.logger.error(e)
+                # self.logger.info("picking up item at index 0")
+                # return CharacterDecision(
+                #     decision_type="PICKUP",
+                #     action_position=self.curr_pos,
+                #     action_index=i
+                # )
         for d in [(1,0),(-1,0),(0,1),(0,-1)]:
             target_pos = Position.create(self.curr_pos.x + d[0], self.curr_pos.y + d[1], self.curr_pos.get_board_id())
             tile_items = self.board.get_tile_at(target_pos).items
