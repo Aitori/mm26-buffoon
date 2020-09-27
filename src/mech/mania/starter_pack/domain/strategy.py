@@ -108,27 +108,27 @@ class Strategy:
                 self.logger.info(self.print_stats(item))
                 stat_mod = item.get_stats()
                 new_stats = 0
-                try: new_stats += stat_mod.get_flat_speed_change()
+                try: new_stats += stat_mod.get_flat_speed_change() * 0
                 except: new_stats += 0
-                try: new_stats += stat_mod.get_percent_speed_change()
+                try: new_stats += stat_mod.get_percent_speed_change() * 0
                 except: new_stats += 0
-                try: new_stats += stat_mod.get_flat_health_change()
+                try: new_stats += stat_mod.get_flat_health_change() * .1
                 except: new_stats += 0
                 try: new_stats += stat_mod.get_percent_health_change()
                 except: new_stats += 0
-                try: new_stats += stat_mod.get_flat_experience_change()
+                try: new_stats += stat_mod.get_flat_experience_change() * 3
                 except: new_stats += 0
-                try: new_stats += stat_mod.get_percent_experience_change()
+                try: new_stats += stat_mod.get_percent_experience_change() * 15
                 except: new_stats += 0
                 try: new_stats += stat_mod.get_flat_attack_change()
                 except: new_stats += 0
-                try: new_stats += stat_mod.get_percent_attack_change()
+                try: new_stats += stat_mod.get_percent_attack_change() * 10
                 except: new_stats += 0
                 try: new_stats += stat_mod.get_flat_defense_change()
                 except: new_stats += 0
-                try: new_stats += stat_mod.get_percent_defense_change()
+                try: new_stats += stat_mod.get_percent_defense_change() * 10
                 except: new_stats += 0
-                try: new_stats += stat_mod.get_flat_regen_per_turn()
+                try: new_stats += stat_mod.get_flat_regen_per_turn() * 0
                 except: new_stats += 0
                 self.logger.info("got stats for index {}".format(i))
                 # new_stats = stat_mods.get_flat_speed_change() + stat_mods.get_percent_speed_change() + stat_mods.get_flat_health_change() + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change()
@@ -179,7 +179,7 @@ class Strategy:
                             action_index=i
                         )
                     stat_mods = tile_items[i].get_stats()
-                    stat_sum = stat_mods.get_flat_speed_change() + stat_mods.get_percent_speed_change() + stat_mods.get_flat_health_change() + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change() +stat_mods.get_percent_defense_change() + stat_mods.get_flat_regen_per_turn() + stat_mods.get_flat_experience_change() + stat_mods.get_percent_experience_change()
+                    stat_sum = stat_mods.get_flat_speed_change() * 0 + stat_mods.get_percent_speed_change() * 0 + stat_mods.get_flat_health_change() * .1 + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change() * 10 +stat_mods.get_percent_defense_change() * 10 + stat_mods.get_flat_regen_per_turn() * 0 + stat_mods.get_flat_experience_change() * 3 + stat_mods.get_percent_experience_change() * 15
                     self.logger.info("new item stat: " + str(stat_sum))
                     self.logger.info("curr stat item: " + str(self.stats[tile_items[i].__class__.__name__]))
                     if stat_sum > self.stats[tile_items[i].__class__.__name__]:
@@ -214,7 +214,7 @@ class Strategy:
                             action_index=0
                         )
                     stat_mods = tile_items[i].get_stats()
-                    stat_sum = stat_mods.get_flat_speed_change() + stat_mods.get_percent_speed_change() + stat_mods.get_flat_health_change() + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change() +stat_mods.get_percent_defense_change() + stat_mods.get_flat_regen_per_turn() + stat_mods.get_flat_experience_change() + stat_mods.get_percent_experience_change()
+                    stat_sum = stat_mods.get_flat_speed_change() * 0 + stat_mods.get_percent_speed_change() * 0 + stat_mods.get_flat_health_change() * .1 + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change() * 10 +stat_mods.get_percent_defense_change() * 10 + stat_mods.get_flat_regen_per_turn() * 0 + stat_mods.get_flat_experience_change() * 3 + stat_mods.get_percent_experience_change() * 15
                     self.logger.info("new item stat: " + str(stat_sum))
                     self.logger.info("curr stat item: " + str(self.stats[tile_items[i].__class__.__name__]))
                     if stat_sum > self.stats[tile_items[i].__class__.__name__]:
@@ -338,10 +338,10 @@ class Strategy:
     # Find weakest monster
     def findWeakest(self, monsters, curr_pos):
         sortedM = sorted(monsters, key=lambda x:x.get_level())
-        minLevel = sortedM[0].get_level()
+        minLevel = self.my_player.get_level()
         sameLevel = []
         j = 0
-        while sortedM[j].get_level() == minLevel:
+        while sortedM[j].get_level() <= minLevel:
             dist = curr_pos.manhattan_distance(sortedM[j].get_position())
             sameLevel.append((dist, sortedM[j]))
             j = j + 1
