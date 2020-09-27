@@ -30,7 +30,7 @@ class Strategy:
         """
         self.api = API(game_state, player_name)
         self.my_player = game_state.get_all_players()[player_name]
-        self.pvpboard = game_state.get_pvp_board()
+        #self.pvpboard = game_state.get_pvp_board()
         self.board = game_state.get_board(self.board_id)
         self.curr_pos = self.my_player.get_position()
         self.monsters = game_state.get_monsters_on_board(self.board_id)
@@ -39,8 +39,8 @@ class Strategy:
         self.bad_monster_squares = self.get_monsters(game_state, self.board_id)
         # cycle through items
         items = self.my_player.get_inventory()
-        self.logger.info("items len: {}".format(len(items)))
-        cur_weapon = self.my_player.weapon
+        self.logger.info("items: {}".format(items))
+        cur_weapon = self.my_player.get_weapon
         for i, item in enumerate(items):
             self.logger.info('exp change: {}, {}'.format(item.get_flat_experience_change(), item.get_percent_experience_change()))
             self.logger.info('atk change: {}, {}'.format(item.get_flat_attack_change(), item.get_percent_attack_change()))
@@ -53,26 +53,26 @@ class Strategy:
                 )
         
         # item pick up
-        # tile_items = self.board.get_tile_at(self.curr_pos).items
-        # if len(tile_items) > 0:
-        #     self.memory.set_value("last_action", "PICKUP")
-        #     self.logger.info("picking up item: {}".format(tile_items))
-        #     return CharacterDecision(
-        #         decision_type="PICKUP",
-        #         action_position=None,
-        #         action_index=0
-        #     )
-        # for d in [(1,0),(-1,0),(0,1),(0,-1)]:
-        #     target_pos = Position.create(self.curr_pos.x + d[0], self.curr_pos.y + d[1], self.curr_pos.get_board_id())
-        #     tile_items = self.board.get_tile_at(self.curr_pos).items
-        #     if len(tile_items) > 0:
-        #         self.memory.set_value("last_action", "MOVE")
-        #         self.logger.info("moving to item")
-        #         return CharacterDecision(
-        #             decision_type="MOVE",
-        #             action_position=target_pos,
-        #             action_index=0
-        #         )
+        tile_items = self.board.get_tile_at(self.curr_pos).items
+        if len(tile_items) > 0:
+            self.memory.set_value("last_action", "PICKUP")
+            self.logger.info("picking up item: {}".format(tile_items))
+            return CharacterDecision(
+                decision_type="PICKUP",
+                action_position=None,
+                action_index=0
+            )
+        for d in [(1,0),(-1,0),(0,1),(0,-1)]:
+            target_pos = Position.create(self.curr_pos.x + d[0], self.curr_pos.y + d[1], self.curr_pos.get_board_id())
+            tile_items = self.board.get_tile_at(target_pos).items
+            if len(tile_items) > 0:
+                self.memory.set_value("last_action", "MOVE")
+                self.logger.info("moving to item")
+                return CharacterDecision(
+                    decision_type="MOVE",
+                    action_position=target_pos,
+                    action_index=0
+                )
         
         ## Choose weakest monster
         weakestMonster = self.findWeakest(self.monsters, self.curr_pos)
