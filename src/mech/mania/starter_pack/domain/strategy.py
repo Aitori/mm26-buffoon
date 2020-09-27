@@ -48,27 +48,32 @@ class Strategy:
         cur_weapon = self.my_player.get_weapon
         self.logger.info('performing inventory check')
         try:
-            if self.character.clothes is not None: self.print_stats(self.character.clothes)
+            if self.character.clothes is not None: 
+                self.print_stats(self.character.clothes)
         except:
             self.logger.info("no clothes to print")
             pass
         try:
-            if self.character.hat is not None: self.print_stats(self.character.hat)
+            if self.character.hat is not None: 
+                self.print_stats(self.character.hat)
         except:
             self.logger.info("no hat to print")
             pass
         try:
-            if self.character.weapon is not None: self.print_stats(self.character.weapon)
+            if self.character.weapon is not None: 
+                self.print_stats(self.character.weapon)
         except:
             self.logger.info("no weapon to print")
             pass
         try:
-            if self.character.shoes is not None: self.print_stats(self.character.shoes)
+            if self.character.shoes is not None: 
+                self.print_stats(self.character.shoes)
         except:
             self.logger.info("no shoes to print")
             pass
         try:    
-            if self.character.accessory is not None: self.print_stats(self.character.accessory)
+            if self.character.accessory is not None: 
+                self.print_stats(self.character.accessory)
         except:
             self.logger.info("no accessory to print")
             pass
@@ -92,7 +97,7 @@ class Strategy:
                 if "Consumable" in item_type:
                     #idk do we equip the consumable before we fite the guy
                     #but also if its a health potion do it now
-                    self.logger.info('index {} is a consumable, dropping'.format(i))
+                    self.logger.info('index {} is a consumable, eating!'.format(i))
                     #actually drop consumables fuck em (no wee eat them right there)
                     return CharacterDecision(
                             decision_type="EQUIP",
@@ -102,6 +107,7 @@ class Strategy:
                     # continue
                 self.logger.info(self.print_stats(item))
                 stat_mod = item.get_stats()
+                new_stats = 0
                 try: new_stats += stat_mod.get_flat_speed_change()
                 except: new_stats += 0
                 try: new_stats += stat_mod.get_percent_speed_change()
@@ -163,47 +169,64 @@ class Strategy:
         if len(tile_items) > 0:
             self.memory.set_value("last_action", "PICKUP")
             self.logger.info("picking up item: {}".format(tile_items))
-            return CharacterDecision(
+            try:
+                for i in range(len(tile_items)):
+                    self.logger.info("grading new item index {}".format(i))
+                    if "Consumable" in tile_items[i].__class__.__name__:
+                        return CharacterDecision(
                             decision_type="PICKUP",
                             action_position=self.curr_pos,
-                            action_index=0
+                            action_index=i
                         )
-            # try:
-            #     for i in range(len(tile_items)):
-            #         self.logger.info("grading new item index {}".format(i))
-            #         # if "Consumable" in tile_items[i].__class__.__name__:
-            #         #     #fuck consumables dont pick them up
-            #         #     continue
-            #         # stat_mods = tile_items[i].get_stats()
-            #         # stat_sum = stat_mods.get_flat_speed_change() + stat_mods.get_percent_speed_change() + stat_mods.get_flat_health_change() + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change()
-            #         # if self.stats[tile_items[i].__class__.__name__.lower()] >= stat_sum:
-            #             self.logger.info("picking up item at index {}".format(i))
-            #             return CharacterDecision(
-            #                 decision_type="PICKUP",
-            #                 action_position=self.curr_pos,
-            #                 action_index=i
-            #             )
-            #         # else:
-            #         #     self.logger.info("skipping index {}, shitty item".format(i))
-            # except Exception as e:
-                # self.logger.error(e)
-                # self.logger.info("picking up item at index 0")
-                # return CharacterDecision(
-                #     decision_type="PICKUP",
-                #     action_position=self.curr_pos,
-                #     action_index=i
-                # )
+                    stat_mods = tile_items[i].get_stats()
+                    stat_sum = stat_mods.get_flat_speed_change() + stat_mods.get_percent_speed_change() + stat_mods.get_flat_health_change() + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change() +stat_mods.get_percent_defense_change() + stat_mods.get_flat_regen_per_turn() + stat_mods.get_flat_experience_change() + stat_mods.get_percent_experience_change()
+                    self.logger.info("new item stat: " + str(stat_sum))
+                    self.logger.info("curr stat item: " + str(self.stats[tile_items[i].__class__.__name__]))
+                    if stat_sum > self.stats[tile_items[i].__class__.__name__]:
+                        self.logger.info("picking up item at index {}".format(i))
+                        return CharacterDecision(
+                            decision_type="PICKUP",
+                            action_position=self.curr_pos,
+                            action_index=i
+                        )
+                    else:
+                        self.logger.info("skipping index {}, shitty item".format(i))
+            except Exception as e:
+                self.logger.error(e)
+                self.logger.info("picking up item at index 0")
+                return CharacterDecision(
+                    decision_type="PICKUP",
+                    action_position=self.curr_pos,
+                    action_index=i
+                )
         for d in [(1,0),(-1,0),(0,1),(0,-1)]:
             target_pos = Position.create(self.curr_pos.x + d[0], self.curr_pos.y + d[1], self.curr_pos.get_board_id())
             tile_items = self.board.get_tile_at(target_pos).items
             if len(tile_items) > 0:
-                self.memory.set_value("last_action", "MOVE")
-                self.logger.info("moving to item")
-                return CharacterDecision(
-                    decision_type="MOVE",
-                    action_position=target_pos,
-                    action_index=0
-                )
+                for i in range(len(tile_items)):
+                    self.logger.info("grading new item index {}".format(i))
+                    if "Consumable" in tile_items[i].__class__.__name__:
+                        self.memory.set_value("last_action", "MOVE")
+                        self.logger.info("moving to item")
+                        return CharacterDecision(
+                            decision_type="MOVE",
+                            action_position=target_pos,
+                            action_index=0
+                        )
+                    stat_mods = tile_items[i].get_stats()
+                    stat_sum = stat_mods.get_flat_speed_change() + stat_mods.get_percent_speed_change() + stat_mods.get_flat_health_change() + stat_mods.get_percent_health_change() + stat_mods.get_flat_defense_change() + stat_mods.get_flat_attack_change() + stat_mods.get_percent_attack_change() +stat_mods.get_percent_defense_change() + stat_mods.get_flat_regen_per_turn() + stat_mods.get_flat_experience_change() + stat_mods.get_percent_experience_change()
+                    self.logger.info("new item stat: " + str(stat_sum))
+                    self.logger.info("curr stat item: " + str(self.stats[tile_items[i].__class__.__name__]))
+                    if stat_sum > self.stats[tile_items[i].__class__.__name__]:
+                        self.memory.set_value("last_action", "MOVE")
+                        self.logger.info("moving to item")
+                        return CharacterDecision(
+                            decision_type="MOVE",
+                            action_position=target_pos,
+                            action_index=0
+                        )
+                    else:
+                        self.logger.info("skipping index {}, shitty item".format(i))
         
         ## Choose weakest monster
         weakestMonster = self.findWeakest(self.monsters, self.curr_pos)
@@ -315,7 +338,7 @@ class Strategy:
     # Find weakest monster
     def findWeakest(self, monsters, curr_pos):
         sortedM = sorted(monsters, key=lambda x:x.get_level())
-        minLevel = sortedM[0].get_level ()
+        minLevel = sortedM[0].get_level()
         sameLevel = []
         j = 0
         while sortedM[j].get_level() == minLevel:
@@ -358,3 +381,29 @@ class Strategy:
         except Exception as e:
             self.logger.error(e)
             self.logger.info("default atk: {}, {}".format(0, 0))
+        
+    def get_stat_num(self, new_item):
+        new_stats = 0
+        try: new_stats += stat_mod.get_flat_speed_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_percent_speed_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_flat_health_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_percent_health_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_flat_experience_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_percent_experience_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_flat_attack_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_percent_attack_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_flat_defense_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_percent_defense_change()
+        except: new_stats += 0
+        try: new_stats += stat_mod.get_flat_regen_per_turn()
+        except: new_stats += 0
+        return new_stats
