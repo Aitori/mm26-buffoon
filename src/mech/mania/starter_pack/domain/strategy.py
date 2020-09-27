@@ -53,7 +53,6 @@ class Strategy:
                 )
         
         # item pick up
-        self.logger.info()
         tile_items = self.board.get_tile_at(self.curr_pos).items
         if len(tile_items) > 0:
             self.memory.set_value("last_action", "PICKUP")
@@ -168,7 +167,7 @@ action_index=0)
     def get_monsters(self, game_state, board_id):
         monsters = game_state.get_monsters_on_board(board_id)
         bad_monster_squares = set()
-        weakest = self.findWeakest(self.monsters, self.curr_pos);
+        weakest = self.findWeakest(self.monsters, self.curr_pos)
         weakest_position = weakest.get_position()
         for monster in monsters:
             m_p = monster.get_position()
