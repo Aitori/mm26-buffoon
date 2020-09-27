@@ -38,52 +38,27 @@ class Strategy:
 
         self.obstacles = self.get_obstacles(game_state)
         self.bad_monster_squares = self.get_monsters(game_state, self.board_id)
-        # last_action, type = self.memory.get_value("last_action", str)
-        # if last_action is not None and last_action == "PICKUP":
-        #     self.memory.set_value("last_action", "EQUIP")
-        #     return CharacterDecision(
-        #         decision_type="EQUIP",
-        #         action_position=None,
-        #         action_index=self.my_player.get_free_inventory_index()
-        #     )
-
-        # tile_items = self.board.get_tile_at(self.curr_pos).items
-        # if tile_items is not None or len(tile_items) > 0:
-        #     self.memory.set_value("last_action", "PICKUP")
-        #     return CharacterDecision(
-        #         decision_type="PICKUP",
-        #         action_position=None,
-        #         action_index=0
-        #     )
-
-        # 
-        # enemies = self.api.find_enemies(self.curr_pos)
-        # if enemies is None or len(enemies) > 0:
-        #     self.memory.set_value("last_action", "MOVE")
-        #     return CharacterDecision(
-        #         decision_type="MOVE",
-        #         action_position=self.my_player.get_spawn_point(),
-        #         action_index=0
-        #     )
-
-        # enemy_pos = enemies[0].get_position()
-        # if self.curr_pos.manhattan_distance(enemy_pos) <= weapon.get_range():
-        #     self.memory.set_value("last_action", "ATTACK")
-        #     return CharacterDecision(
-        #         decision_type="ATTACK",
-        #         action_position=enemy_pos,
-        #         action_index=0
-        #     )
-        # self.logger.info("yes1")
-        # self.memory.set_value("last_action", "MOVE")
-        # decision = CharacterDecision(
-        #     decision_type="MOVE",
-        #     action_position=move_down_position(),#find_position_to_move(self.my_player, enemy_pos),
-        #     action_index=0
-        # )
-        # self.logger.info("yes3")
-        # return decision
-        
+        # item pick up
+        tile_items = self.board.get_tile_at(self.curr_pos).items
+        if len(tile_items) > 0:
+            self.memory.set_value("last_action", "PICKUP")
+            self.logger.info("picking up item: {}".format(tile_items))
+            return CharacterDecision(
+                decision_type="PICKUP",
+                action_position=None,
+                action_index=0
+            )
+        for d in [(1,0),(-1,0),(0,1),(0,-1)]:
+            target_pos = Position.create(self.curr_pos.x + d[0], self.curr_pos.y + d[1], self.curr_pos.get_board_id())
+            tile_items = self.board.get_tile_at(self.curr_pos).items
+            if len(tile_items) > 0:
+                self.memory.set_value("last_action", "MOVE")
+                self.logger.info("moving to item")
+                return CharacterDecision(
+                    decision_type="MOVE",
+                    action_position=target_pos,
+                    action_index=0
+                )
         ## Choose weakest monster
         weakestMonster = self.findWeakest(self.monsters, self.curr_pos)
         weapon = self.my_player.get_weapon()
@@ -177,7 +152,7 @@ action_index=0)
     def get_monsters(self, game_state, board_id):
         monsters = game_state.get_monsters_on_board(board_id)
         bad_monster_squares = set()
-        weakest = self.findWeakest(self.monsters);
+        weakest = self.findWeakest(self.monsters, self.curr_pos);
         weakest_position = weakest.get_position()
         for monster in monsters:
             m_p = monster.get_position()
@@ -192,7 +167,7 @@ action_index=0)
     # Find weakest monster
     def findWeakest(self, monsters, curr_pos):
         sortedM = sorted(monsters, key=lambda x:x.get_level())
-        minLevel = sortedM[i].get_level()
+        minLevel = sortedM[0].get_level ()
         sameLevel = []
         j = 0
         while sortedM[j].get_level() == minLevel:
@@ -201,6 +176,6 @@ action_index=0)
             j = j + 1
         nextMonster = sorted(sameLevel, key=lambda x:x[0])
         i = 0
-        while nextMonster[i].get_current_health() <= 0:
+        while nextMonster[i][1].get_current_health() <= 0:
             i = i + 1
-        return nextMonster[i]
+        return nextMonster[i][1]
