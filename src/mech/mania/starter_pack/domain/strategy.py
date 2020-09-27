@@ -38,7 +38,22 @@ class Strategy:
 
         self.obstacles = self.get_obstacles(game_state)
         self.bad_monster_squares = self.get_monsters(game_state, self.board_id)
+        # cycle through items
+        items = self.my_player.get_inventory()
+        cur_weapon = self.my_player.weapon
+        for i, item in enumerate(items):
+            self.logger.info('exp change: {}, {}'.format(item.get_flat_experience_change(), item.get_percent_experience_change()))
+            self.logger.info('atk change: {}, {}'.format(item.get_flat_attack_change(), item.get_percent_attack_change()))
+            if item.get_flat_attack_change() > cur_weapon.get_flat_attack_change():
+                self.logger.info('equiping item')
+                return CharacterDecision(
+                    decision_type="EQUIP",
+                    action_position=None,
+                    action_index=i
+                )
+        
         # item pick up
+        self.logger.info()
         tile_items = self.board.get_tile_at(self.curr_pos).items
         if len(tile_items) > 0:
             self.memory.set_value("last_action", "PICKUP")
@@ -59,6 +74,7 @@ class Strategy:
                     action_position=target_pos,
                     action_index=0
                 )
+        
         ## Choose weakest monster
         weakestMonster = self.findWeakest(self.monsters, self.curr_pos)
         weapon = self.my_player.get_weapon()
@@ -99,7 +115,7 @@ action_index=0)
     def zhou_astar_path_to_move(self, player: Position, destination: Position):
         frontier = []
         path = []
-        pp = player.get_position();
+        pp = player.get_position()
         heapq.heapify(frontier)
         start = Node(0, None, (pp.x, pp.y))
         heapq.heappush(frontier, (0, (pp.x, pp.y), start))
