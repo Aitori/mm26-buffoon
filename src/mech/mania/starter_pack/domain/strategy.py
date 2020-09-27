@@ -85,7 +85,7 @@ class Strategy:
         # return decision
         
         ## Choose weakest monster
-        weakestMonster = self.findWeakest(self.monsters)
+        weakestMonster = self.findWeakest(self.monsters, self.curr_pos)
         weapon = self.my_player.get_weapon()
         ## Check if weakest monster is in attack range
         if self.curr_pos.manhattan_distance(weakestMonster.position) <= weapon.get_range():
@@ -190,9 +190,17 @@ action_index=0)
         return bad_monster_squares
 
     # Find weakest monster
-    def findWeakest(self, monsters):
+    def findWeakest(self, monsters, curr_pos):
         sortedM = sorted(monsters, key=lambda x:x.get_level())
+        minLevel = sortedM[i].get_level()
+        sameLevel = []
+        j = 0
+        while sortedM[j].get_level() == minLevel:
+            dist = curr_pos.manhattan_distance(sortedM[j].get_position())
+            sameLevel.append((dist, sortedM[j]))
+            j = j + 1
+        nextMonster = sorted(sameLevel, key=lambda x:x[0])
         i = 0
-        while sortedM[i].get_current_health() <= 0:
+        while nextMonster[i].get_current_health() <= 0:
             i = i + 1
-        return sortedM[i]
+        return nextMonster[i]
